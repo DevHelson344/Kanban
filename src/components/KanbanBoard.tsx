@@ -16,9 +16,9 @@ interface KanbanBoardProps {
 }
 
 const columns: { id: TaskStatus; title: string; color: string }[] = [
-  { id: "todo", title: "A Fazer", color: "bg-gray-100" },
-  { id: "doing", title: "Fazendo", color: "bg-blue-100" },
-  { id: "done", title: "Concluído", color: "bg-green-100" },
+  { id: "todo", title: "A Fazer", color: "bg-gray-100 dark:bg-gray-700" },
+  { id: "doing", title: "Fazendo", color: "bg-blue-100 dark:bg-gray-700" },
+  { id: "done", title: "Concluído", color: "bg-green-100 dark:bg-gray-700" },
 ];
 
 const priorityColors = {
@@ -28,13 +28,27 @@ const priorityColors = {
 };
 
 const isOverdue = (dueDate: string) => {
-  return new Date(dueDate) < new Date();
+  const today = new Date();
+  const due = new Date(dueDate + 'T23:59:59');
+  return due < today;
 };
 
-export function KanbanBoard({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onExportTasks, onImportTasks }: KanbanBoardProps) {
+export function KanbanBoard({
+  tasks,
+  onAddTask,
+  onUpdateTask,
+  onDeleteTask,
+  onMoveTask,
+  onExportTasks,
+  onImportTasks,
+}: KanbanBoardProps) {
   const [showForm, setShowForm] = useState(false);
-  const [newTask, setNewTask] = useState({ title: "", description: "", dueDate: "" });
-  
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    dueDate: "",
+  });
+
   const {
     searchTerm,
     setSearchTerm,
@@ -50,14 +64,18 @@ export function KanbanBoard({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newTask.title.trim()) {
-      onAddTask(newTask.title, newTask.description || undefined, newTask.dueDate || undefined);
+      onAddTask(
+        newTask.title,
+        newTask.description || undefined,
+        newTask.dueDate || undefined
+      );
       setNewTask({ title: "", description: "", dueDate: "" });
       setShowForm(false);
     }
   };
 
   const getTasksByStatus = (status: TaskStatus) => {
-    return filteredTasks.filter(task => task.status === status);
+    return filteredTasks.filter((task) => task.status === status);
   };
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
@@ -74,30 +92,26 @@ export function KanbanBoard({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMo
     onMoveTask(taskId, status);
   };
 
-  const overdueTasks = tasks.filter(t => t.dueDate && isOverdue(t.dueDate) && t.status !== "done").length;
+  const overdueTasks = tasks.filter(
+    (t) => t.dueDate && isOverdue(t.dueDate) && t.status !== "done"
+  ).length;
 
   return (
-    <div className="h-screen bg-white rounded-lg shadow-sm border p-6 overflow-hidden flex flex-col">
+    <div className="h-screen bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-6 overflow-hidden flex flex-col">
       <div className="flex items-center justify-between mb-6 flex-shrink-0">
         <div className="flex items-center gap-4">
-          <h2 className="text-xl font-semibold">Kanban Board</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Kanban Board</h2>
           {overdueTasks > 0 && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-md text-sm">
+            <div className="flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md text-sm">
               <AlertTriangle className="h-4 w-4" />
-              {overdueTasks} atrasada{overdueTasks > 1 ? 's' : ''}
+              {overdueTasks} atrasada{overdueTasks > 1 ? "s" : ""}
             </div>
           )}
         </div>
         <div className="flex gap-2">
           <button
-            onClick={onImportTasks}
-            className="px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm"
-          >
-            Importar
-          </button>
-          <button
             onClick={onExportTasks}
-            className="px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 text-sm"
           >
             Exportar
           </button>
@@ -123,36 +137,46 @@ export function KanbanBoard({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMo
       />
 
       {showForm && (
-        <div className="mb-6 p-4 border rounded-lg bg-gray-50 flex-shrink-0">
+        <div className="mb-6 p-4 border dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 flex-shrink-0">
           <form onSubmit={handleSubmit} className="space-y-3">
             <input
               type="text"
               placeholder="Título da tarefa"
               value={newTask.title}
-              onChange={(e) => setNewTask(prev => ({ ...prev, title: e.target.value }))}
-              className="w-full px-3 py-2 border rounded-md"
+              onChange={(e) =>
+                setNewTask((prev) => ({ ...prev, title: e.target.value }))
+              }
+              className="w-full px-3 py-2 border dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               autoFocus
             />
             <textarea
               placeholder="Descrição (opcional)"
               value={newTask.description}
-              onChange={(e) => setNewTask(prev => ({ ...prev, description: e.target.value }))}
-              className="w-full px-3 py-2 border rounded-md h-20 resize-none"
+              onChange={(e) =>
+                setNewTask((prev) => ({ ...prev, description: e.target.value }))
+              }
+              className="w-full px-3 py-2 border dark:border-gray-600 rounded-md h-20 resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             />
             <input
               type="date"
               value={newTask.dueDate}
-              onChange={(e) => setNewTask(prev => ({ ...prev, dueDate: e.target.value }))}
-              className="px-3 py-2 border rounded-md"
+              onChange={(e) => {
+                const selectedDate = e.target.value;
+                setNewTask((prev) => ({ ...prev, dueDate: selectedDate }));
+              }}
+              className="px-3 py-2 border dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             />
             <div className="flex gap-2">
-              <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
                 Adicionar
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 border rounded-md hover:bg-gray-100"
+                className="px-4 py-2 border dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
               >
                 Cancelar
               </button>
@@ -162,7 +186,7 @@ export function KanbanBoard({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMo
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 overflow-hidden">
-        {columns.map(column => {
+        {columns.map((column) => {
           const columnTasks = getTasksByStatus(column.id);
           return (
             <div
@@ -171,32 +195,37 @@ export function KanbanBoard({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMo
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, column.id)}
             >
-              <h3 className="font-medium mb-4 flex items-center justify-between flex-shrink-0">
+              <h3 className="font-medium mb-4 flex items-center justify-between flex-shrink-0 text-gray-900 dark:text-white">
                 {column.title}
-                <span className="text-sm bg-white px-2 py-1 rounded">
+                <span className="text-sm bg-white dark:bg-gray-600 px-2 py-1 rounded text-gray-900 dark:text-white">
                   {columnTasks.length}
                 </span>
               </h3>
-              
+
               <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-                {columnTasks.map(task => {
-                  const taskOverdue = task.dueDate && isOverdue(task.dueDate) && task.status !== "done";
+                {columnTasks.map((task) => {
+                  const taskOverdue =
+                    task.dueDate &&
+                    isOverdue(task.dueDate) &&
+                    task.status !== "done";
                   return (
                     <div
                       key={task.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, task.id)}
                       className={cn(
-                        "bg-white p-3 rounded-md shadow-sm border-l-4 cursor-move hover:shadow-md transition-shadow flex-shrink-0",
+                        "bg-white dark:bg-gray-800 p-3 rounded-md shadow-sm border-l-4 cursor-move hover:shadow-md transition-shadow flex-shrink-0",
                         priorityColors[task.priority],
                         taskOverdue && "ring-2 ring-red-300"
                       )}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <h4 className="font-medium text-sm flex items-center gap-2">
+                          <h4 className="font-medium text-sm flex items-center gap-2 text-gray-900 dark:text-white">
                             {task.title}
-                            {taskOverdue && <AlertTriangle className="h-3 w-3 text-red-500" />}
+                            {taskOverdue && (
+                              <AlertTriangle className="h-3 w-3 text-red-500" />
+                            )}
                           </h4>
                         </div>
                         <button
@@ -206,27 +235,35 @@ export function KanbanBoard({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMo
                           <Trash2 className="h-3 w-3" />
                         </button>
                       </div>
-                      
+
                       {task.description && (
-                        <p className="text-xs text-gray-600 mb-2">{task.description}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                          {task.description}
+                        </p>
                       )}
-                      
-                      <div className="flex items-center justify-between text-xs text-gray-500">
+
+                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                         <select
                           value={task.priority}
-                          onChange={(e) => onUpdateTask(task.id, { priority: e.target.value as TaskPriority })}
-                          className="text-xs border-none bg-transparent"
+                          onChange={(e) =>
+                            onUpdateTask(task.id, {
+                              priority: e.target.value as TaskPriority,
+                            })
+                          }
+                          className="text-xs border-none bg-transparent text-gray-900 dark:text-white"
                         >
                           <option value="low">Baixa</option>
                           <option value="medium">Média</option>
                           <option value="high">Alta</option>
                         </select>
-                        
+
                         {task.dueDate && (
-                          <div className={cn(
-                            "flex items-center gap-1",
-                            taskOverdue && "text-red-600 font-medium"
-                          )}>
+                          <div
+                            className={cn(
+                              "flex items-center gap-1",
+                              taskOverdue && "text-red-600 font-medium"
+                            )}
+                          >
                             <Calendar className="h-3 w-3" />
                             {new Date(task.dueDate).toLocaleDateString("pt-BR")}
                           </div>

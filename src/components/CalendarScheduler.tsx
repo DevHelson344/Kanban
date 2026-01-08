@@ -3,8 +3,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Calendar as CalendarIcon,
+  Grid3X3,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { WeekView } from "./WeekView";
 import type { Booking, BookingStatus } from "@/types";
 
 export interface CalendarDay {
@@ -38,9 +41,13 @@ export function CalendarScheduler({
   onBookingClick,
 }: CalendarSchedulerProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<"month" | "week">("month");
 
   const formatDateKey = (date: Date) => {
-    return date.toISOString().split("T")[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const getCalendarDays = (): CalendarDay[] => {
@@ -87,10 +94,60 @@ export function CalendarScheduler({
   const calendarDays = getCalendarDays();
   const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
+  if (viewMode === "week") {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setViewMode("month")}
+              className="flex items-center gap-2 px-3 py-2 text-sm bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+            >
+              <Grid3X3 className="h-4 w-4" />
+              Mês
+            </button>
+            <button
+              onClick={() => setViewMode("week")}
+              className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-md"
+            >
+              <Calendar className="h-4 w-4" />
+              Semana
+            </button>
+          </div>
+        </div>
+        <WeekView
+          bookings={bookings}
+          onDateClick={onDateClick}
+          onBookingClick={onBookingClick}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border">
-      <div className="flex items-center justify-between p-4 border-b">
-        <h2 className="text-lg font-semibold">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setViewMode("month")}
+            className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-md"
+          >
+            <Grid3X3 className="h-4 w-4" />
+            Mês
+          </button>
+          <button
+            onClick={() => setViewMode("week")}
+            className="flex items-center gap-2 px-3 py-2 text-sm bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+          >
+            <Calendar className="h-4 w-4" />
+            Semana
+          </button>
+        </div>
+      </div>
+      
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
+      <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           {currentDate.toLocaleDateString("pt-BR", {
             month: "long",
             year: "numeric",
@@ -99,19 +156,19 @@ export function CalendarScheduler({
 
         <div className="flex items-center gap-2">
           <button
-            className="p-2 hover:bg-gray-100 rounded-md"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md text-gray-600 dark:text-gray-300"
             onClick={() => navigateMonth("prev")}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
-            className="p-2 hover:bg-gray-100 rounded-md"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md text-gray-600 dark:text-gray-300"
             onClick={() => setCurrentDate(new Date())}
           >
             <CalendarIcon className="h-4 w-4" />
           </button>
           <button
-            className="p-2 hover:bg-gray-100 rounded-md"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md text-gray-600 dark:text-gray-300"
             onClick={() => navigateMonth("next")}
           >
             <ChevronRight className="h-4 w-4" />
@@ -124,7 +181,7 @@ export function CalendarScheduler({
           {weekDays.map((day) => (
             <div
               key={day}
-              className="p-2 text-center text-sm font-medium text-gray-500"
+              className="p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400"
             >
               {day}
             </div>
@@ -140,9 +197,9 @@ export function CalendarScheduler({
               <div
                 key={index}
                 className={cn(
-                  "min-h-[80px] p-2 border rounded-md cursor-pointer hover:bg-gray-50 transition-colors",
-                  !day.isCurrentMonth && "text-gray-400 bg-gray-50",
-                  day.isToday && "bg-blue-50 border-blue-200"
+                  "min-h-[80px] p-2 border dark:border-gray-700 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors",
+                  !day.isCurrentMonth && "text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800/50",
+                  day.isToday && "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
                 )}
                 onClick={() => onDateClick?.(day.date)}
               >
@@ -150,14 +207,14 @@ export function CalendarScheduler({
                   <span
                     className={cn(
                       "text-sm font-medium",
-                      day.isToday && "text-blue-600"
+                      day.isToday && "text-blue-600 dark:text-blue-400"
                     )}
                   >
                     {day.date.getDate()}
                   </span>
 
                   {totalBookings > 0 && (
-                    <span className="text-xs px-1.5 py-0.5 bg-gray-200 rounded">
+                    <span className="text-xs px-1.5 py-0.5 bg-gray-200 dark:bg-gray-600 rounded text-gray-700 dark:text-gray-300">
                       {totalBookings}
                     </span>
                   )}
@@ -173,7 +230,7 @@ export function CalendarScheduler({
                             statusColors[status as BookingStatus]
                           )}
                         />
-                        <span className="text-xs text-gray-600">{count}</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">{count}</span>
                       </div>
                     ))}
                   </div>
@@ -204,7 +261,7 @@ export function CalendarScheduler({
                     </div>
                   ))}
                   {totalBookings > 2 && (
-                    <div className="text-xs text-gray-500 text-center">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
                       +{totalBookings - 2} mais
                     </div>
                   )}
@@ -215,7 +272,7 @@ export function CalendarScheduler({
         </div>
       </div>
 
-      <div className="flex items-center justify-center gap-6 p-4 border-t bg-gray-50">
+      <div className="flex items-center justify-center gap-6 p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         {Object.entries(statusLabels).map(([status, label]) => (
           <div key={status} className="flex items-center gap-2">
             <div
@@ -224,9 +281,10 @@ export function CalendarScheduler({
                 statusColors[status as BookingStatus]
               )}
             />
-            <span className="text-sm text-gray-600">{label}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">{label}</span>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

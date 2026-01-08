@@ -14,7 +14,10 @@ export function useCalendarData({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const formatDateKey = (date: Date) => {
-    return date.toISOString().split("T")[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   // Combinar bookings manuais com tarefas que têm data de vencimento
